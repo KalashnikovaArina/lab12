@@ -18,12 +18,14 @@ int main() {
 
     while (window.isOpen()) {
         sf::Event event;
-        while (window.pollEvent(event)) {
+        while (window.pollEvent(event)) 
+        {
             if (event.type == sf::Event::Closed)
                 window.close();
             else if (event.type == sf::Event::Resized)
                 glViewport(0, 0, event.size.width, event.size.height);
-            else if (event.type == sf::Event::KeyPressed) {
+            else if (event.type == sf::Event::KeyPressed) 
+            {
                 switch (event.key.code) {
                 case sf::Keyboard::Num1:
                     drawMode = 0;
@@ -61,9 +63,17 @@ int main() {
                 case sf::Keyboard::K: scaleY -= scaleStep; break;
                 case sf::Keyboard::J: scaleX -= scaleStep; break;
                 case sf::Keyboard::L: scaleX += scaleStep; break;
-                case sf::Keyboard::X: proportion = (proportion + 0.05f < 1.0f) ? proportion + 0.05f : 1.0f; break; // Пропорция смешивания
-                case sf::Keyboard::C: proportion = (proportion - 0.05f > 0.0f) ? proportion - 0.05f : 0.0f; break; // Пропорция смешивания
                 default: break;
+                }
+            }
+            else if (event.type == sf::Event::MouseWheelScrolled) {
+                if (event.mouseWheelScroll.delta > 0) {
+                    // Вращение колеса мыши вверх увеличивает пропорцию
+                    proportion = (proportion + 0.05f < 1.0f) ? proportion + 0.05f : 1.0f;
+                }
+                else if (event.mouseWheelScroll.delta < 0) {
+                    // Вращение колеса мыши вниз уменьшает пропорцию
+                    proportion = (proportion - 0.05f > 0.0f) ? proportion - 0.05f : 0.0f;
                 }
             }
         }
@@ -222,19 +232,19 @@ void InitHexahedron()
 }
 
 void InitGradientCircle() {
-    const int segments = 100;
-    const float radius = 0.5f;
+    const int segments = 100; // Количество сегментов (треугольников) для построения круга
+    const float radius = 0.5f; // Радиус круга
     const float PI = 3.14159265359f;
 
     std::vector<Vertex> vertices;
     vertices.push_back({ 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f });
 
     for (int i = 0; i <= segments; ++i) {
-        float angle = 2.0f * PI * i / segments;
-        float x = radius * cos(angle);
+        float angle = 2.0f * PI * i / segments; 
+        float x = radius * cos(angle); //Вычисляются по формуле параметрического уравнения окружности
         float y = radius * sin(angle);
 
-        float hue = static_cast<float>(i) / segments;
+        float hue = static_cast<float>(i) / segments; // Нормализованное значение для градиента
         float r, g, b;
         HSVtoRGB(hue, 1.0f, 1.0f, r, g, b);
 
@@ -251,17 +261,17 @@ void InitGradientCircle() {
     indices.push_back(segments);
     indices.push_back(1);
 
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO); //Для хранения массива вершин.
+    glGenBuffers(1, &EBO); //Для хранения массива индексов.
+    glGenVertexArrays(1, &VAO); //Для упрощения работы с состояниями буферов
 
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW); //Вершины загружаются в GL_ARRAY_BUFFER (буфер вершин).
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW); //Индексы загружаются в GL_ELEMENT_ARRAY_BUFFER (буфер индексов).
 
     glVertexAttribPointer(Attrib_vertex, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
     glEnableVertexAttribArray(Attrib_vertex);
@@ -371,16 +381,16 @@ void DrawHexahedronTextureColor()
 
 void DrawHexahedronTextureTexture()
 {
-    GLuint texture1;
+    GLuint texture1; //Создаёт уникальный идентификатор для текстуры 
     glGenTextures(1, &texture1);
-    glBindTexture(GL_TEXTURE_2D, texture1);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glBindTexture(GL_TEXTURE_2D, texture1); //Привязывает текстуру с указанным идентификатором к целевому типу. Все последующие операции с GL_TEXTURE_2D будут применены к этой текстуре.
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //Как сглаживать текстуру при уменьшении.
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //Как сглаживать текстуру при увеличении. Значение GL_LINEAR указывает на использование линейной интерполяции.
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //Как текстура будет повторяться по горизонтали (S) и вертикали (T).
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); //Значение GL_REPEAT заставляет текстуру зацикливаться.
 
-    Image* photo_img1 = loadImage("cube_hamster.jpg");
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, photo_img1->sizeX, photo_img1->sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, photo_img1->data);
+    Image* photo_img1 = loadImage("cube_hamster.jpg"); //Загружает изображение с помощью библиотеки stb_image и возвращает объект Image с размерами (sizeX, sizeY) и данными пикселей (data).
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, photo_img1->sizeX, photo_img1->sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, photo_img1->data); //photo_img1->data: Указатель на данные изображения.
 
     GLuint texture2;
     glGenTextures(1, &texture2);
@@ -393,9 +403,9 @@ void DrawHexahedronTextureTexture()
     Image* photo_img2 = loadImage("cube_makima.jpg");
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, photo_img2->sizeX, photo_img2->sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, photo_img2->data);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture1);
-    glUniform1i(glGetUniformLocation(Program, "ourTexture1"), 0);
+    glActiveTexture(GL_TEXTURE0); //Выбирает текстурный слот:
+    glBindTexture(GL_TEXTURE_2D, texture1); // Привязывает соответствующую текстуру к выбранному слоту.
+    glUniform1i(glGetUniformLocation(Program, "ourTexture1"), 0); //"ourTexture1" привязывается к текстурному слоту 0.
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texture2);
@@ -403,7 +413,7 @@ void DrawHexahedronTextureTexture()
 
     glUniform1f(glGetUniformLocation(Program, "proportion"), proportion);
 
-    glDrawElements(GL_QUADS, 24, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_QUADS, 24, GL_UNSIGNED_INT, 0); //Тип примитивов — четырёхугольники.
 
     if (photo_img1 != nullptr)
         freeImage(photo_img1);
